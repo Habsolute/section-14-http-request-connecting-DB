@@ -32,26 +32,40 @@ function App() {
     setError(null);
 
     try {
-      let url = "https://swapi.dev/api/films/";
+      // let url = "https://swapi.dev/api/films/";
 
-      const resp = await fetch(url);
+      let firebaseUrl =
+        "https://react-http-testing-1d3bc-default-rtdb.firebaseio.com/movies.json";
+
+      const resp = await fetch(firebaseUrl);
 
       if (!resp.ok) {
         throw new Error("Something went wrong!");
       }
       const data = await resp.json();
 
-      const transformedMovies = data.results.map((movieData) => {
-        return {
-          id: movieData.episode_id,
-          title: movieData.title,
-          openingText: movieData.opening_crawl,
-          releaseDate: movieData.releade_date,
-        };
-      });
-      setMovieList(transformedMovies);
+      const loadedMovies = [];
+
+      for (const key in data) {
+        loadedMovies.push({
+          id: key,
+          title: data[key].title,
+          openingText: data[key].openingText,
+          releaseDate: data[key].releaseDate,
+        });
+      }
+
+      // const transformedMovies = data.results.map((movieData) => {
+      //   return {
+      //     id: movieData.episode_id,
+      //     title: movieData.title,
+      //     openingText: movieData.opening_crawl,
+      //     releaseDate: movieData.releade_date,
+      //   };
+      // });
+      setMovieList(loadedMovies);
       setIsLoading(false);
-      console.log(transformedMovies);
+      console.log(loadedMovies);
     } catch (error) {
       setIsLoading(false);
       setError(error.message);
@@ -95,8 +109,20 @@ function App() {
     fetchMoviesHandler();
   }, [fetchMoviesHandler]);
 
-  function addMovieHandler(movie) {
+  async function addMovieHandler(movie) {
     console.log(movie);
+    const resp = await fetch(
+      "https://react-http-testing-1d3bc-default-rtdb.firebaseio.com/movies.json",
+      {
+        method: "POST",
+        body: JSON.stringify(movie),
+        headers: {
+          "content-type": "application/json",
+        },
+      }
+    );
+    const data = await resp.json();
+    console.log(data);
   }
 
   let content = <p>Found no movies.</p>;
